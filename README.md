@@ -8,6 +8,55 @@ The platform provides a centralized operational layer where authenticated users 
 
 The architecture uses three AWS accounts.
 
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+  A[User in Browser] --> B[CloudFront React UI]
+
+  B -- Redirect to Login --> C[Cognito Hosted UI]
+  C -- JWT Token --> B
+
+  B -- GET /resources/s3 with JWT --> D[API Gateway]
+  D -- Validate Token --> E[Cognito User Pool Authorizer]
+  D --> F[Lambda: Get Resources Function]
+
+  F -- Check Cognito Group --> G[Group: nonprod-s3-viewer]
+  F -- AssumeRole --> H[Shared Account IAM Role]
+  H -- sts:AssumeRole --> I[Non-Prod Monitoring Role]
+
+  I -- Read S3 Buckets and Tags --> J[S3 Resources in Non-Prod Account]
+  F -- Return Resource Data --> B
+
+  K[Developer] -- git push --> L[CodeCommit]
+  L --> M[CodePipeline]
+  M --> N[CodeBuild]
+  N -- CDK Deploy --> O[Shared Account Stack]
+  N -- CDK Deploy --> P[Non-Prod Account Stack]
+
+  subgraph CICD_Account
+    L
+    M
+    N
+  end
+
+  subgraph Shared_Account
+    B
+    C
+    D
+    E
+    F
+    G
+    H
+    O
+  end
+
+  subgraph NonProd_Account
+    I
+    J
+    P
+  end
+
 ### 1. CICD Account
 
 Purpose:
