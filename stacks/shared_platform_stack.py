@@ -105,12 +105,12 @@ class SharedPlatformStack(Stack):
             removal_policy=RemovalPolicy.DESTROY
         )
 
-        # user_pool.add_domain(
-        #     "UserPoolDomain",
-        #     cognito_domain=cognito.CognitoDomainOptions(
-        #         domain_prefix=cognito_config["domain_prefix"] + "-" + self.account
-        #     )
-        # )
+        user_pool.add_domain(
+            "UserPoolDomain",
+            cognito_domain=cognito.CognitoDomainOptions(
+                domain_prefix=cognito_config["domain_prefix"] + "-" + self.account
+            )
+        )
 
         callback_url = f"https://{distribution.distribution_domain_name}"
 
