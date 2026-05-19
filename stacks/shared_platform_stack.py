@@ -108,7 +108,7 @@ class SharedPlatformStack(Stack):
         user_pool.add_domain(
             "UserPoolDomain",
             cognito_domain=cognito.CognitoDomainOptions(
-                domain_prefix=cognito_config["domain_prefix"] + "-" + self.account
+                domain_prefix=f"{cognito_config['domain_prefix']}-{self.account}"
             )
         )
 

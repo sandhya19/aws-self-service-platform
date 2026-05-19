@@ -19,7 +19,7 @@
 
   "cognito": {
     "viewer_group_name": "nonprod-s3-viewer",
-    "domain_prefix": "aws-self-service-monitoring-demo"
+    "domain_prefix": "selfservice-monitoring-demo"
   },
 
   "roles": {
