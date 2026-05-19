@@ -1,0 +1,34 @@
+{
+  "app_name": "aws-self-service-monitoring",
+  "region": "eu-west-2",
+
+  "accounts": {
+    "cicd": "258083582547",
+    "shared": "639986415539",
+    "nonprod": "444198539420"
+  },
+
+  "codecommit": {
+    "repository_name": "aws-self-service-system",
+    "branch": "main"
+  },
+
+  "pipeline": {
+    "name": "aws-self-service-monitoring-pipeline"
+  },
+
+  "cognito": {
+    "viewer_group_name": "nonprod-s3-viewer",
+    "domain_prefix": "aws-self-service-monitoring-demo"
+  },
+
+  "roles": {
+    "shared_invoker_role_name": "SharedMonitoringInvokerRole",
+    "nonprod_monitoring_role_name": "NonProdMonitoringInvokeRole"
+  },
+
+  "paths": {
+    "frontend_build": "frontend/build",
+    "get_resources_lambda": "lambda/get_resources"
+  }
+}
