@@ -14,31 +14,21 @@ The architecture uses three AWS accounts.
 flowchart TD
   A[User in Browser] --> B[CloudFront React UI]
 
-  B -- Redirect to Login --> C[Cognito Hosted UI]
+  B -- Login --> C[Cognito Hosted UI]
   C -- JWT Token --> B
 
-  B -- GET /resources/s3 with JWT --> D[API Gateway]
+  B -- Select S3 Bucket --> D[API Gateway]
   D -- Validate Token --> E[Cognito User Pool Authorizer]
-  D --> F[Lambda: Get Resources Function]
+  D --> F[Lambda Backend]
 
-  F -- Check Cognito Group --> G[Group: nonprod-s3-viewer]
-  F -- AssumeRole --> H[Shared Account IAM Role]
-  H -- sts:AssumeRole --> I[Non-Prod Monitoring Role]
+  F -- Check Group --> G[Group: nonprod-s3-viewer]
+  F -- AssumeRole --> H[Non-Prod Monitoring Role]
 
-  I -- Read S3 Buckets and Tags --> J[S3 Resources in Non-Prod Account]
-  F -- Return Resource Data --> B
+  H -- Add Tag monitored=true --> I[S3 Bucket]
+  H -- Create/Update --> J[CloudWatch Alarms]
+  J --> K[SNS Notification Topic]
 
-  K[Developer] -- git push --> L[CodeCommit]
-  L --> M[CodePipeline]
-  M --> N[CodeBuild]
-  N -- CDK Deploy --> O[Shared Account Stack]
-  N -- CDK Deploy --> P[Non-Prod Account Stack]
-
-  subgraph CICD_Account
-    L
-    M
-    N
-  end
+  F -- Monitoring Enabled Response --> B
 
   subgraph Shared_Account
     B
@@ -47,14 +37,13 @@ flowchart TD
     E
     F
     G
-    H
-    O
   end
 
   subgraph NonProd_Account
+    H
     I
     J
-    P
+    K
   end
 
 ### 1. CICD Account
