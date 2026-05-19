@@ -110,6 +110,7 @@ class SharedPlatformStack(Stack):
         #     cognito_domain=cognito.CognitoDomainOptions(
         #         domain_prefix=cognito_config["domain_prefix"] + "-" + self.account
         #     )
+        # )
 
         callback_url = f"https://{distribution.distribution_domain_name}"
 
@@ -117,7 +118,9 @@ class SharedPlatformStack(Stack):
             "UserPoolClient",
             user_pool_client_name=f"{app_name}-ui-client",
             auth_flows=cognito.AuthFlow(
+                user_srp=True,
                 user_password=True
+            ),
             o_auth=cognito.OAuthSettings(
                 flows=cognito.OAuthFlows(
                     implicit_code_grant=True
@@ -133,7 +136,6 @@ class SharedPlatformStack(Stack):
             prevent_user_existence_errors=True
         )
 
-            ),
         cognito.UserPoolGroup(
             self,
             "S3ViewerGroup",
@@ -157,7 +159,6 @@ class SharedPlatformStack(Stack):
 
         shared_invoker_role = iam.Role(
             self,
-        # )
             "SharedMonitoringInvokerRole",
             role_name=roles["shared_invoker_role_name"],
             assumed_by=iam.ServicePrincipal("states.amazonaws.com"),
@@ -165,7 +166,6 @@ class SharedPlatformStack(Stack):
         )
 
         shared_invoker_role.add_to_policy(
-                user_srp=True,
             iam.PolicyStatement(
                 actions=["sts:AssumeRole"],
                 resources=[
