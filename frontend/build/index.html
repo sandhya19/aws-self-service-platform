@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AWS Self Service Monitoring</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background: #f7f7f7;
+      color: #222;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 24px;
+      max-width: 900px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 10px 16px;
+      border: 0;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #232f3e;
+      color: white;
+      margin-right: 10px;
+    }
+
+    pre {
+      background: #111;
+      color: #eee;
+      padding: 16px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h1>AWS Self Service Monitoring</h1>
+    <p>Phase 1: S3 monitoring access through Cognito group authorization.</p>
+
+    <button onclick="login()">Login with Cognito</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <div class="card">
+    <h2>Runtime Config</h2>
+
+    <label>API URL</label>
+    <input id="apiUrl" value="REPLACE_WITH_API_URL/s3" />
+
+    <label>Cognito Login URL</label>
+    <input id="loginUrl" value="REPLACE_WITH_COGNITO_LOGIN_URL" />
+
+    <button onclick="loadResources()">Load S3 Monitoring Data</button>
+  </div>
+
+  <div class="card">
+    <h2>Token Status</h2>
+    <pre id="tokenStatus">No token found</pre>
+  </div>
+
+  <div class="card">
+    <h2>API Result</h2>
+    <pre id="result">No request sent</pre>
+  </div>
+
+  <script>
+    function getHashValue(key) {
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      return params.get(key);
+    }
+
+    function getStoredToken() {
+      return localStorage.getItem("id_token");
+    }
+
+    function setTokenStatus() {
+      const token = getStoredToken();
+
+      if (!token) {
+        document.getElementById("tokenStatus").textContent = "No token found";
+        return;
+      }
+
+      document.getElementById("tokenStatus").textContent = "Token found in browser storage";
+    }
+
+    function captureTokenFromUrl() {
+      const idToken = getHashValue("id_token");
+
+      if (idToken) {
+        localStorage.setItem("id_token", idToken);
+        window.location.hash = "";
+      }
+
+      setTokenStatus();
+    }
+
+    function login() {
+      const loginUrl = document.getElementById("loginUrl").value;
+      window.location.href = loginUrl;
+    }
+
+    function logout() {
+      localStorage.removeItem("id_token");
+      setTokenStatus();
+      document.getElementById("result").textContent = "Logged out";
+    }
+
+    async function loadResources() {
+      const apiUrl = document.getElementById("apiUrl").value;
+      const token = getStoredToken();
+
+      if (!token) {
+        document.getElementById("result").textContent = "Please login first";
+        return;
+      }
+
+      const response = await fetch(apiUrl, {
+        method: "GET",
+        headers: {
+          "Authorization": token
+        }
+      });
+
+      const data = await response.json();
+      document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+    }
+
+    captureTokenFromUrl();
+  </script>
+</body>
+</html>
